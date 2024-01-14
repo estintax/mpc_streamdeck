@@ -1,0 +1,5 @@
+if key == 1
+	deck:switch-scene, "Start"
+elif key == 2
+	deck:switch-scene, "Сцена 2"
+end

@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/albenik/go-serial"
 	"github.com/andreykaipov/goobs"
+	"github.com/tarm/serial"
 )
 
 var client *goobs.Client
@@ -50,16 +50,6 @@ func reinitAnswer() {
 func main() {
 	fmt.Println("MPC Streamdeck (C) 2024 Maksim Pinigin")
 	if !initConfig() {
-		ports, err := serial.GetPortsList()
-		if err != nil {
-			log.Println("Unable to list serial ports:", err.Error())
-		} else {
-			if len(ports) == 0 {
-				log.Fatalln("No available serial ports!")
-				return
-			}
-			fmt.Println("Available ports: " + strings.Join(ports, ", "))
-		}
 		config.serialPort = enterSerial("Enter serial port: ", false)
 		config.host = enterSerial("Enter OBS API host: ", false)
 		config.password = enterSerial("Enter OBS API password: ", false)
@@ -82,8 +72,8 @@ func main() {
 		return
 	}
 	log.Println("OBS version:", version.ObsVersion)
-	c := &serial.Mode{BaudRate: 9600}
-	s, err := serial.Open(config.serialPort, c)
+	c := &serial.Config{Name: config.serialPort, Baud: 9600}
+	s, err := serial.OpenPort(c)
 	if err != nil {
 		log.Println("Unable to init serial:", err.Error())
 		reinitAnswer()

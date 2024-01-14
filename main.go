@@ -56,7 +56,6 @@ func main() {
 		config.dlScriptPath = enterSerial("Enter path to the your DinoLang script: ", false)
 		saveConfig()
 	}
-	initDL()
 	var err error
 	client, err = goobs.New(config.host, goobs.WithPassword(config.password))
 	if err != nil {
@@ -72,6 +71,7 @@ func main() {
 		return
 	}
 	log.Println("OBS version:", version.ObsVersion)
+	initDL()
 	c := &serial.Config{Name: config.serialPort, Baud: 9600}
 	s, err := serial.OpenPort(c)
 	if err != nil {

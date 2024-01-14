@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/andreykaipov/goobs/api/requests/inputs"
 	"github.com/andreykaipov/goobs/api/requests/scenes"
 	"github.com/estintax/mpc_streamdeck/dinolang"
 )
@@ -48,6 +49,64 @@ func DeckClassHandler(args []string, segmentName string) bool {
 				return false
 			} else {
 				dinolang.PrintError("Type of the first argument is not a string")
+				dinolang.SetReturned("int", 0, segmentName)
+				return false
+			}
+		} else {
+			dinolang.PrintError("Too few arguments")
+			dinolang.SetReturned("int", 0, segmentName)
+			return false
+		}
+	case "switch-mute":
+		if len(args) > 1 {
+			if dinolang.GetTypeEx(args[1]) == "string" {
+				audioName := dinolang.StringToText(dinolang.IfVariableReplaceIt(args[1]).(string))
+				params := inputs.NewGetInputMuteParams()
+				params.InputName = &audioName
+				res, err := client.Inputs.GetInputMute(params)
+				if err != nil {
+					dinolang.PrintError(err.Error())
+					dinolang.SetReturned("int", 0, segmentName)
+					return false
+				}
+				muted := !res.InputMuted
+				newParams := inputs.NewSetInputMuteParams()
+				newParams.InputName = &audioName
+				newParams.InputMuted = &muted
+				_, err = client.Inputs.SetInputMute(newParams)
+				if err != nil {
+					dinolang.PrintError(err.Error())
+					dinolang.SetReturned("int", 0, segmentName)
+					return false
+				}
+				dinolang.SetReturned("int", 1, segmentName)
+			} else {
+				dinolang.PrintError("Type of the first argument is not a string")
+				dinolang.SetReturned("int", 0, segmentName)
+				return false
+			}
+		} else {
+			dinolang.PrintError("Too few arguments")
+			dinolang.SetReturned("int", 0, segmentName)
+			return false
+		}
+	case "inputs":
+		if len(args) > 1 {
+			if dinolang.GetTypeEx(args[1]) == "unknown" {
+				res, err := client.Inputs.GetInputList()
+				if err != nil {
+					dinolang.PrintError(err.Error())
+					dinolang.SetReturned("int", 0, segmentName)
+					return false
+				}
+				var inputs []string
+				for _, i := range res.Inputs {
+					inputs = append(inputs, i.InputName)
+				}
+				dinolang.SetVariable(args[1], inputs)
+				dinolang.SetReturned("int", len(inputs), segmentName)
+			} else {
+				dinolang.PrintError("Type of the first argument must be unknown")
 				dinolang.SetReturned("int", 0, segmentName)
 				return false
 			}
